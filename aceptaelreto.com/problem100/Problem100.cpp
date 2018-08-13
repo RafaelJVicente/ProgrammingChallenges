@@ -1,14 +1,14 @@
 //============================================================================
 // Author       : Rafael J. Vicente
 // E-mail       : rafaelj.vicente@gmail.com
-// Version      : 1.0
+// Version      : 1.1
 // Copyright    : All rights reserved
 //============================================================================
 
 #include <iostream>
 #include <string>
-#include <vector>
 #include <algorithm>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -17,40 +17,42 @@ using namespace std;
  */
 int main()
 {
+  const int KAPREKAR = 6174;
+  const int MAX_S = 4;
+
   int n_numbers;
   cin >> n_numbers;
 
   for (int i = 0; i < n_numbers; ++i)
   {
-    int iteration = 0, x;
-    cin >> x;
+    int num;
+    cin >> num;
 
-    while (x != 0 && x != 6174)
+    int arr[MAX_S];
+    int iteration = 0;
+    while (num != 0 && num != KAPREKAR)
     {
       // Iteration++
       ++iteration;
 
-      vector<unsigned char> n;
-      for (int i = 0; i < 4; i++)
+      // Load number in array
+      for (int j = MAX_S - 1; j >= 0; --j)
       {
-        n.push_back(x % 10);
-        x /= 10;
+        const auto tmp = div(num, 10);
+        arr[j] = tmp.rem;
+        num = tmp.quot;
       }
 
       // Order
-      sort(n.begin(), n.end());
+      sort(arr, arr + MAX_S);
 
-      const int a = n[3] * 1000 + n[2] * 100 + n[1] * 10 + n[0];
-      const int b = n[0] * 1000 + n[1] * 100 + n[2] * 10 + n[3];
-      x = a - b;
+      // Inverse - ordered (ex.: 4321-1234)
+      num = 999 * arr[3] + 90 * arr[2] - 90 * arr[1] - 999 * arr[0];
     }
 
     // Repdigits (1111,2222, etc.)
-    if (x == 0)
-      iteration = 8;
-
     // Print iteration number
-    cout << iteration << endl;
+    cout << (num ? iteration : 8) << endl;
   }
 
   return 0;
