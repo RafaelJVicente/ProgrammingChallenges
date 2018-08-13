@@ -6,9 +6,7 @@
 //============================================================================
 
 #include <iostream>
-#include <string>
 #include <algorithm>
-#include <stdlib.h>
 
 using namespace std;
 
@@ -50,8 +48,7 @@ int main()
       num = 999 * arr[3] + 90 * arr[2] - 90 * arr[1] - 999 * arr[0];
     }
 
-    // Repdigits (1111,2222, etc.)
-    // Print iteration number
+    // Print iteration number or 8 to indicate Repdigits (1111,2222, etc.)
     cout << (num ? iteration : 8) << endl;
   }
 
