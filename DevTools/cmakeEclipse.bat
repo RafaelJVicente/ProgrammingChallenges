@@ -1,7 +1,9 @@
-SET foldName=ProgrammingChallenges_build
-cd ../..
-rmdir %foldName% /s /q
-mkdir %foldName%
-cd %foldName%
-cmake ../ProgrammingChallenges -G"Eclipse CDT4 - MinGW Makefiles"
+cd ..
+FOR %%I IN (.) DO SET foldName=%%~nI%%~xI
+cd ..
+SET buildFoldName=%foldName%_build
+rmdir %buildFoldName% /s /q
+mkdir %buildFoldName%
+cd %buildFoldName%
+cmake ../%foldName% -G"Eclipse CDT4 - MinGW Makefiles"
 PAUSE

@@ -1,7 +1,9 @@
 #!/bin/sh
-foldName=ProgrammingChallenges_build
-cd ../..
-rm -rf $foldName
-mkdir $foldName
-cd $foldName
-cmake ../ProgrammingChallenges -G"Eclipse CDT4 - Unix Makefiles"
+cd ..
+foldName==${PWD##*/}
+buildFoldName==${PWD##*/}_build
+cd ..
+rm -rf $buildFoldName
+mkdir $buildFoldName
+cd $buildFoldName
+cmake ../$foldName -G"Eclipse CDT4 - Unix Makefiles"
