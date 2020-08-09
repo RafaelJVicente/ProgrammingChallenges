@@ -1,7 +1,7 @@
 //============================================================================
 // Author       : Rafael J. Vicente
 // E-mail       : rafaelj.vicente@gmail.com
-// Version      : 1.4
+// Version      : 1.5
 // Copyright    : All rights reserved
 //============================================================================
 
@@ -215,7 +215,9 @@ void List::push_back(Pair element)
   ++m_size;
 
   ++m_in;
-  m_in %= m_max_size;
+  //m_in %= m_max_size;
+  if (m_in >= m_max_size)
+      m_in -= m_max_size;
   m_array[m_in] = element;
 }
 
@@ -230,7 +232,10 @@ void List::push_mid_remove_backs(Pair element)
     while (!found && p_ini <= p_end)
     {
       p_mid = (p_ini + p_end) / 2;
-      p_fixed = (m_out + p_mid) % m_max_size;
+      p_fixed = m_out + p_mid;
+      //p_fixed %= m_max_size;
+      if (p_fixed >= m_max_size)
+          p_fixed -= m_max_size;
       aux = m_array[p_fixed];
       found = element == aux || p_ini == p_end;
       if (!found && element > aux)
@@ -251,7 +256,10 @@ Pair List::pop_back()
   --m_size;
 
   Pair elemnt = m_array[m_in];
-  m_in = (m_in - 1 + m_max_size) % m_max_size;
+  m_in = m_in - 1 + m_max_size;
+  //m_in %= m_max_size;
+  if (m_in >= m_max_size)
+      m_in -= m_max_size;
   return elemnt;
 }
 
@@ -262,6 +270,8 @@ Pair List::pop_front()
 
   Pair aux = m_array[m_out];
   ++m_out;
-  m_out %= m_max_size;
+  //m_out %= m_max_size;
+  if (m_out >= m_max_size)
+      m_out -= m_max_size;
   return aux;
 }
