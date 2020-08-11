@@ -1,57 +1,85 @@
 //============================================================================
 // Author       : Rafael J. Vicente
 // E-mail       : rafaelj.vicente@gmail.com
-// Version      : 1.1
+// Version      : 1.2
 // Copyright    : All rights reserved
 //============================================================================
 
 #include <iostream>
 #include <algorithm>
+#include <map>
+#include <list>
 
 using namespace std;
+
 
 /**
  * Main function
  */
 int main()
 {
-  const int KAPREKAR = 6174;
-  const int MAX_S = 4;
+    const int MAX_S = 4;
 
-  int n_numbers;
-  cin >> n_numbers;
+    int n_numbers;
+    cin >> n_numbers;
 
-  for (int i = 0; i < n_numbers; ++i)
-  {
-    int num;
-    cin >> num;
+    map<int, int> cache_map;
 
     int arr[MAX_S];
-    int iteration = 0;
-    while (num != 0 && num != KAPREKAR)
+    for (int i = 0; i < n_numbers; ++i)
     {
-      // Iteration++
-      ++iteration;
 
-      // Load number in array
-      for (int j = MAX_S - 1; j >= 0; --j)
-      {
-        const auto tmp = div(num, 10);
-        arr[j] = tmp.rem;
-        num = tmp.quot;
-      }
+        int num;
+        cin >> num;
 
-      // Order
-      sort(arr, arr + MAX_S);
+        if (num % 1111 == 0)
+        {
+            cout << 8 << endl;
+            continue;
+        }
+        else
+        {
+            int iteration = 0;
+            list<int> num_list;
+            while (num != 6174)
+            {
+                // Load, sort and form number in array and sort
+                for (int j = MAX_S - 1; j >= 0; --j)
+                {
+                    auto tmp = div(num, 10);
+                    arr[j] = tmp.rem;
+                    num = tmp.quot;
+                }
+                sort(arr, arr + MAX_S);
+                num = arr[3] * 1000 + arr[2] * 100 + arr[1] * 10 + arr[0] * 1;
 
-      // Inverse - ordered (ex.: 4321-1234)
-      num = 999 * arr[3] + 90 * arr[2] - 90 * arr[1] - 999 * arr[0];
+                // Search for cached
+                auto it = cache_map.find(num);
+                if (it != cache_map.end())
+                {
+                    iteration += it->second;
+                    break;
+                }
+
+                num_list.push_back(num);
+
+                // Inverse - ordered (ex.: 4321-1234)
+                num = 999 * arr[3] + 90 * arr[2] - 90 * arr[1] - 999 * arr[0];
+
+                // Iteration++
+                ++iteration;
+            }
+
+            int aux_iteration = iteration;
+            for (const auto& cached_num : num_list)
+            {
+                cache_map[cached_num] = aux_iteration--;
+            }
+
+            cout << iteration << endl;
+        }
     }
 
-    // Print iteration number or 8 to indicate Repdigits (1111,2222, etc.)
-    cout << (num ? iteration : 8) << endl;
-  }
-
-  return 0;
+    return 0;
 }
 
