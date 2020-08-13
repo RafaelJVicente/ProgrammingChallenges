@@ -1,13 +1,23 @@
 //============================================================================
 // Author       : Rafael J. Vicente
 // E-mail       : rafaelj.vicente@gmail.com
-// Version      : 1.7
+// Version      : 1.8
 // Copyright    : All rights reserved
 //============================================================================
 
 #include <iostream>
 
 using namespace std;
+
+void read_int(int &number)
+{
+    register int c;
+    number = 0;
+    c = getchar();
+
+    for (; (c > 47 && c < 58); c = getchar())
+        number = number * 10 + c - 48;
+}
 
 /**
  * Pair<value,expire> where value is the number and expire the expiration time
@@ -59,20 +69,26 @@ private:
  */
 int main()
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
     auto arr = new Pair[200000];
 
     int n_letters, n_taken;
-    for (string line; cin >> n_letters >> n_taken, !(n_letters == 0 && n_taken == 0);)
-    {
 
+    //for (; cin >> n_letters >> n_taken, !(n_letters == 0 && n_taken == 0);)
+    for (; read_int(n_letters), read_int(n_taken), !(n_letters == 0 && n_taken == 0);)
+    {
         if (n_taken == 1)
         {
             int aux;
-            cin >> aux;
+            //cin >> aux;
+            read_int(aux);
             cout << aux;
             for (int i = 1; i < n_letters; ++i)
             {
-                cin >> aux;
+                //cin >> aux;
+                read_int(aux);
                 cout << ' ' << aux;
             }
         }
@@ -84,7 +100,9 @@ int main()
             int num, max = 0, max_limit;
             for (int i = 0; i < n_letters; ++i)
             {
-                cin >> num;
+                //cin >> num;
+                read_int(num);
+
                 expire = i + n_taken;
                 if (num >= max)
                 { // New num is max
