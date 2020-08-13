@@ -142,7 +142,7 @@ int main()
             }
         }
 
-        cout << endl;
+        cout << "\n";
     }
 
     delete[] arr;
