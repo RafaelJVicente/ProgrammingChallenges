@@ -1,7 +1,7 @@
 //============================================================================
 // Author       : Rafael J. Vicente
 // E-mail       : rafaelj.vicente@gmail.com
-// Version      : 1.1
+// Version      : 1.3
 // Copyright    : All rights reserved
 //============================================================================
 
@@ -11,10 +11,10 @@ using namespace std;
 
 void read_int(int &number)
 {
-    register int c;
+    register int c = ' ';
     number = 0;
-    c = getchar();
-
+    for (; c = getchar(), c == ' ' || c == '\n';);
+        
     for (; (c > 47 && c < 58); c = getchar())
         number = number * 10 + c - 48;
 }
@@ -31,15 +31,24 @@ int main()
     const char* ESOTERIC = "ESOTERICO\n";
     const char* DIABOLIC = "DIABOLICO\n";
 
+    const int MAX_n = 1024;
+    const int MAX_MAT_SIZE_n = MAX_n * MAX_n;
+    int* input_vector = new int[MAX_MAT_SIZE_n];
+    bool* natural_vector = new bool[MAX_MAT_SIZE_n];
+    int* col_CM = new int[MAX_n];  // Zero's
+    //std::fill(input_vector, input_vector + MAX_MAT_SIZE_n, 0);
+    //std::fill(natural_vector, natural_vector + MAX_MAT_SIZE_n, false);
+    //std::fill(col_CM, col_CM + MAX_n, 0);
+
     int n;
-    for (; read_int(n), n != 0;)
+    for(; read_int(n), n != 0;)
     {
-        const int MAT_SIZE = n * n;
-        int* input_vector = new int[MAT_SIZE];
-        bool* natural_vector = new bool[MAT_SIZE]();
+        const int MAT_SIZE_n = n * n;
+        //std::fill(input_vector, input_vector + MAT_SIZE_n, 0);
+        std::fill(natural_vector, natural_vector + MAT_SIZE_n, false);
 
         int CM = 0;
-        int* col_CM = new int[n]();  // Zero's
+        std::fill(col_CM, col_CM + n, 0);
         int v_index = 0;
 
         // CHECK DIABOLIC
@@ -77,6 +86,12 @@ int main()
             }
             isDiabolic = row_CM == CM;
         }
+        for (;v_index < MAT_SIZE_n; ++v_index)
+        {
+            int _;
+            read_int(_);  // Drop unread elements
+        }
+
         if (!isDiabolic || CM != dia_CM || dia_CM != inv_dia_CM)
         {
             cout << NO;
@@ -94,7 +109,7 @@ int main()
         bool isEsoteric = true;
 
         // 1. Values from 1 to n^2 (natural numbers)
-        for (int i = 0; isEsoteric && i < MAT_SIZE; ++i)
+        for (int i = 0; isEsoteric && i < MAT_SIZE_n; ++i)
             isEsoteric = natural_vector[i];
         if (!isEsoteric)
         {
@@ -158,11 +173,11 @@ int main()
         }
         
         cout << ESOTERIC;
-
-        delete[] input_vector;
-        delete[] natural_vector;
-        delete[] col_CM;
     }
+
+    delete[] input_vector;
+    delete[] natural_vector;
+    delete[] col_CM;
 
     return 0;
 }
