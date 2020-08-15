@@ -1,7 +1,7 @@
 //============================================================================
 // Author       : Rafael J. Vicente
 // E-mail       : rafaelj.vicente@gmail.com
-// Version      : 1.4
+// Version      : 1.5
 // Copyright    : All rights reserved
 //============================================================================
 
@@ -13,25 +13,27 @@ void read_int(int &number)
 {
     register int c = ' ';
     number = 0;
-    for (; c = getchar(), c == ' ' || c == '\n';);
+    c = getchar();
+    if (c == '\n')
+        c = getchar();
 
     for (; (c > 47 && c < 58); c = getchar())
         number = number * 10 + c - 48;
 }
 
-void prepare_index_map(const int &n, int* &index_map)
+void prepare_index_map(const int &n, int index_map[16])
 {
-    const int idx_ul = 0;
-    const int idx_ur = n - 1;
-    const int idx_dl = n * idx_ur;
-    const int idx_dr = idx_dl + idx_ur;
+    register int idx_ul = 0;
+    register int idx_ur = n - 1;
+    register int idx_dl = n * idx_ur;
+    register int idx_dr = idx_dl + idx_ur;
 
-    const int idx_um = n >> 1;  // n / 2
-    const int idx_lm = n * idx_um;
-    const int idx_rm = idx_lm + idx_ur;
-    const int idx_dm = idx_dl + idx_um;
+    register int idx_um = n >> 1;  // n / 2
+    register int idx_lm = n * idx_um;
+    register int idx_rm = idx_lm + idx_ur;
+    register int idx_dm = idx_dl + idx_um;
 
-    const int idx_mm = idx_lm + idx_um;
+    register int idx_mm = idx_lm + idx_um;
 
     int im_i;
     if (n % 2 != 0)  // 3. n is odd
@@ -48,14 +50,14 @@ void prepare_index_map(const int &n, int* &index_map)
     }
     else
     {
-        const int idx_um2 = idx_um - 1;
-        const int idx_lm2 = n * idx_um2;
-        const int idx_rm2 = idx_lm2 + idx_ur;
-        const int idx_dm2 = idx_dm - 1;
+        register int idx_um2 = idx_um - 1;
+        register int idx_lm2 = n * idx_um2;
+        register int idx_rm2 = idx_lm2 + idx_ur;
+        register int idx_dm2 = idx_dm - 1;
 
-        const int idx_mm2 = idx_mm - 1;
-        const int idx_mm3 = idx_lm2 + idx_um;
-        const int idx_mm4 = idx_mm3 - 1;
+        register int idx_mm2 = idx_mm - 1;
+        register int idx_mm3 = idx_lm2 + idx_um;
+        register int idx_mm4 = idx_mm3 - 1;
 
         index_map[0] = idx_ul;  // Up
         index_map[1] = idx_um2;
@@ -133,8 +135,8 @@ int main()
     const char* ESOTERIC = "ESOTERICO\n";
     const char* DIABOLIC = "DIABOLICO\n";
 
-    int* col_CM = new int[1024];
-    int* index_map = new int[16];
+    int col_CM[1024];
+    int index_map[16];
 
     for (int n; read_int(n), n != 0;)
     {
@@ -145,7 +147,7 @@ int main()
         int im_idx = 0;
 
         // gauss_sum = (n^2) * (n^2 + 1) / 2
-        int gauss_sum = MAT_SIZE_n * (MAT_SIZE_n + 1);  
+        int gauss_sum = MAT_SIZE_n * (MAT_SIZE_n + 1);
         gauss_sum = gauss_sum >> 1;
         int gauss_sum_aux = 0;
 
@@ -180,48 +182,27 @@ int main()
             else
                 isDiabolic = row_CM == CM;
         }
-        if (!isDiabolic || CM != dia_CM || dia_CM != inv_dia_CM)
+        isDiabolic &= CM == dia_CM && dia_CM == inv_dia_CM;
+        for (; v_index < MAT_SIZE_n; ++v_index)
         {
-            cout << NO;
-            for (; v_index < MAT_SIZE_n; ++v_index)
-            {
-                int _;
-                read_int(_);  // Drop unread elements
-            }
-            continue;
+            int _;
+            read_int(_);  // Drop unread elements
         }
         for (int i = 0; isDiabolic && i < n; ++i)
             isDiabolic = col_CM[i] == CM;
         if (!isDiabolic)
-        {
             cout << NO;
-            continue;
-        }
-
-        // CHECK DIABOLIC EXOTERIC
-        bool isEsoteric = true;
-
-        // 1. Values from 1 to n^2 (natural numbers)
-        isEsoteric = gauss_sum == gauss_sum_aux;
-        if (!isEsoteric)
+        else
         {
-            cout << DIABOLIC;
-            continue;
+            // CHECK DIABOLIC EXOTERIC
+            // 1. Values from 1 to n^2 (natural numbers)
+            bool isEsoteric = gauss_sum == gauss_sum_aux;
+            // 2 & 3 & 4. Centers
+            if (isEsoteric)
+                evaluate_index_map(n, index_map, CM, isEsoteric);
+            cout << (isEsoteric ? ESOTERIC : DIABOLIC);
         }
-
-        // 2 & 3 & 4. Centers
-        evaluate_index_map(n, index_map, CM, isEsoteric);
-        if (!isEsoteric)
-        {
-            cout << DIABOLIC;
-            continue;
-        }
-
-        cout << ESOTERIC;
     }
-
-    delete[] index_map;
-    delete[] col_CM;
 
     return 0;
 }
