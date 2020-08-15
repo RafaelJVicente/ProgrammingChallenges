@@ -1,7 +1,7 @@
 //============================================================================
 // Author       : Rafael J. Vicente
 // E-mail       : rafaelj.vicente@gmail.com
-// Version      : 1.3
+// Version      : 1.4
 // Copyright    : All rights reserved
 //============================================================================
 
@@ -14,9 +14,111 @@ void read_int(int &number)
     register int c = ' ';
     number = 0;
     for (; c = getchar(), c == ' ' || c == '\n';);
-        
+
     for (; (c > 47 && c < 58); c = getchar())
         number = number * 10 + c - 48;
+}
+
+void prepare_index_map(const int &n, int* &index_map)
+{
+    const int idx_ul = 0;
+    const int idx_ur = n - 1;
+    const int idx_dl = n * idx_ur;
+    const int idx_dr = idx_dl + idx_ur;
+
+    const int idx_um = n >> 1;  // n / 2
+    const int idx_lm = n * idx_um;
+    const int idx_rm = idx_lm + idx_ur;
+    const int idx_dm = idx_dl + idx_um;
+
+    const int idx_mm = idx_lm + idx_um;
+
+    int im_i;
+    if (n % 2 != 0)  // 3. n is odd
+    {
+        index_map[0] = idx_ul;  // Up
+        index_map[1] = idx_um;
+        index_map[2] = idx_ur;
+        index_map[3] = idx_lm;  // Mid
+        index_map[4] = idx_mm;
+        index_map[5] = idx_rm;
+        index_map[6] = idx_dl;  // Down
+        index_map[7] = idx_dm;
+        index_map[8] = idx_dr;
+    }
+    else
+    {
+        const int idx_um2 = idx_um - 1;
+        const int idx_lm2 = n * idx_um2;
+        const int idx_rm2 = idx_lm2 + idx_ur;
+        const int idx_dm2 = idx_dm - 1;
+
+        const int idx_mm2 = idx_mm - 1;
+        const int idx_mm3 = idx_lm2 + idx_um;
+        const int idx_mm4 = idx_mm3 - 1;
+
+        index_map[0] = idx_ul;  // Up
+        index_map[1] = idx_um2;
+        index_map[2] = idx_um;
+        index_map[3] = idx_ur;
+        index_map[4] = idx_lm2;  // Mid A
+        index_map[5] = idx_mm4;
+        index_map[6] = idx_mm3;
+        index_map[7] = idx_rm2;
+        index_map[8] = idx_lm;  // Mid B
+        index_map[9] = idx_mm2;
+        index_map[10] = idx_mm;
+        index_map[11] = idx_rm;
+        index_map[12] = idx_dl;  // Down
+        index_map[13] = idx_dm2;
+        index_map[14] = idx_dm;
+        index_map[15] = idx_dr;
+    }
+}
+
+void evaluate_index_map(const int &n, const int* index_map, const int& CM, bool& isEsoteric)
+{
+    int CM2 = CM << 2;
+    CM2 /= n;
+    int corners = 0;
+    int centers = 0;
+    int sides = 0;
+    if (n % 2 != 0)  // 3. n is odd
+    {
+        corners += index_map[0];  // Up
+        sides += index_map[1];
+        corners += index_map[2];
+        sides += index_map[3];  // Mid
+        centers += index_map[4];
+        sides += index_map[5];
+        corners += index_map[6];  // Down
+        sides += index_map[7];
+        corners += index_map[8];
+
+        centers = centers << 2;
+    }
+    else
+    {
+        corners += index_map[0];  // Up
+        sides += index_map[1];
+        sides += index_map[2];
+        corners += index_map[3];
+        sides += index_map[4];  // Mid A
+        centers += index_map[5];
+        centers += index_map[6];
+        sides += index_map[7];
+        sides += index_map[8];  // Mid B
+        centers += index_map[9];
+        centers += index_map[10];
+        sides += index_map[11];
+        corners += index_map[12];  // Down
+        sides += index_map[13];
+        sides += index_map[14];
+        corners += index_map[15];
+
+        sides = sides >> 1;
+    }
+    isEsoteric = corners == CM2 && sides == CM2 && centers == CM2;
 }
 
 /**
@@ -31,70 +133,61 @@ int main()
     const char* ESOTERIC = "ESOTERICO\n";
     const char* DIABOLIC = "DIABOLICO\n";
 
-    const int MAX_n = 1024;
-    const int MAX_MAT_SIZE_n = MAX_n * MAX_n;
-    int* input_vector = new int[MAX_MAT_SIZE_n];
-    bool* natural_vector = new bool[MAX_MAT_SIZE_n];
-    int* col_CM = new int[MAX_n];  // Zero's
-    //std::fill(input_vector, input_vector + MAX_MAT_SIZE_n, 0);
-    //std::fill(natural_vector, natural_vector + MAX_MAT_SIZE_n, false);
-    //std::fill(col_CM, col_CM + MAX_n, 0);
+    int* col_CM = new int[1024];
+    int* index_map = new int[16];
 
-    int n;
-    for(; read_int(n), n != 0;)
+    for (int n; read_int(n), n != 0;)
     {
-        const int MAT_SIZE_n = n * n;
-        //std::fill(input_vector, input_vector + MAT_SIZE_n, 0);
-        std::fill(natural_vector, natural_vector + MAT_SIZE_n, false);
+        int MAT_SIZE_n = n * n;
+
+        // index_map used to take the pos (corners, sides and centers) and cache its values in one read
+        prepare_index_map(n, index_map);
+        int im_idx = 0;
+
+        // gauss_sum = (n^2) * (n^2 + 1) / 2
+        int gauss_sum = MAT_SIZE_n * (MAT_SIZE_n + 1);  
+        gauss_sum = gauss_sum >> 1;
+        int gauss_sum_aux = 0;
 
         int CM = 0;
         std::fill(col_CM, col_CM + n, 0);
+
         int v_index = 0;
-
-        // CHECK DIABOLIC
-        // Read first line
-        for (; v_index < n; ++v_index)
-        {
-            int value;
-            read_int(value);
-            input_vector[v_index] = value;
-            natural_vector[value - 1] = true;
-            CM += value;
-            col_CM[v_index] += value;
-        }
-
-        int dia_CM = input_vector[0];
-        int inv_dia_CM = input_vector[n - 1];
+        int dia_CM = 0;
+        int inv_dia_CM = 0;
 
         // Read the rest
         bool isDiabolic = true;
-        for (int j = 1; isDiabolic && (j < n); ++j)
+        for (int j = 0; isDiabolic && (j < n); ++j)
         {
             int row_CM = 0;
             for (int i = 0; i < n; ++i, ++v_index)
             {
                 int value;
                 read_int(value);
-                input_vector[v_index] = value;
-                natural_vector[value - 1] = true;
+                gauss_sum_aux += value;
                 row_CM += value;
                 col_CM[i] += value;
                 if (i == j)
                     dia_CM += value;
                 if (i == n - 1 - j)
                     inv_dia_CM += value;
+                if (index_map[im_idx] == v_index)
+                    index_map[im_idx++] = value;
             }
-            isDiabolic = row_CM == CM;
+            if (j == 0)
+                CM = row_CM;
+            else
+                isDiabolic = row_CM == CM;
         }
-        for (;v_index < MAT_SIZE_n; ++v_index)
-        {
-            int _;
-            read_int(_);  // Drop unread elements
-        }
-
         if (!isDiabolic || CM != dia_CM || dia_CM != inv_dia_CM)
         {
             cout << NO;
+            for (; v_index < MAT_SIZE_n; ++v_index)
+            {
+                int _;
+                read_int(_);  // Drop unread elements
+            }
             continue;
         }
         for (int i = 0; isDiabolic && i < n; ++i)
@@ -109,74 +202,25 @@ int main()
         bool isEsoteric = true;
 
         // 1. Values from 1 to n^2 (natural numbers)
-        for (int i = 0; isEsoteric && i < MAT_SIZE_n; ++i)
-            isEsoteric = natural_vector[i];
+        isEsoteric = gauss_sum == gauss_sum_aux;
         if (!isEsoteric)
         {
             cout << DIABOLIC;
             continue;
         }
 
-        // 2. Sum of corner values == CM 
-        const int CM2 = 4 * CM / n;
-
-        const int idx_ul = 0;
-        const int idx_ur = n - 1;
-        const int idx_dl = n * idx_ur;
-        const int idx_dr = idx_dl + idx_ur;
-
-        isEsoteric = CM2 == (input_vector[idx_ul] + input_vector[idx_ur] + input_vector[idx_dl] + input_vector[idx_dr]);
+        // 2 & 3 & 4. Centers
+        evaluate_index_map(n, index_map, CM, isEsoteric);
         if (!isEsoteric)
         {
             cout << DIABOLIC;
             continue;
         }
-        
-        // 3 & 4. Centers
-        const int idx_mu = n >> 1;  // n / 2
-        const int idx_ml = n * idx_mu;
-        const int idx_mr = idx_ml + idx_ur;
-        const int idx_md = idx_dl + idx_mu;
 
-        const int idx_center = idx_ml + idx_mu;
-
-        int border_sum = input_vector[idx_mu] + input_vector[idx_ml] + input_vector[idx_mr] + input_vector[idx_md];
-        int center_sum = input_vector[idx_center];
-
-        if (n % 2 != 0)  // 3. n is odd
-        {
-            center_sum = center_sum << 2;  // 4 * center_sum
-            isEsoteric = border_sum == CM2 && center_sum == CM2;
-        }
-        else
-        {
-            // 4. n is even
-            const int idx_mu2 = idx_mu - 1;
-            const int idx_ml2 = n * idx_mu2;
-            const int idx_mr2 = idx_ml2 + idx_ur;
-            const int idx_md2 = idx_md - 1;
-
-            const int idx_center2 = idx_center - 1;
-            const int idx_center3 = idx_ml2 + idx_mu;
-            const int idx_center4 = idx_ml2 + idx_mu2;
-
-            center_sum += input_vector[idx_center2] + input_vector[idx_center3] + input_vector[idx_center4];
-            border_sum += input_vector[idx_mu2] + input_vector[idx_ml2] + input_vector[idx_mr2] + input_vector[idx_md2];
-            border_sum = border_sum >> 1;  // n / 2
-            isEsoteric = border_sum == CM2 && center_sum == CM2;
-        }
-
-        if (!isEsoteric)
-        {
-            cout << DIABOLIC;
-            continue;
-        }
-        
         cout << ESOTERIC;
     }
 
-    delete[] input_vector;
-    delete[] natural_vector;
+    delete[] index_map;
     delete[] col_CM;
 
     return 0;
