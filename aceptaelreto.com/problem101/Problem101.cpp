@@ -1,7 +1,7 @@
 //============================================================================
 // Author       : Rafael J. Vicente
 // E-mail       : rafaelj.vicente@gmail.com
-// Version      : 1.5
+// Version      : 1.6
 // Copyright    : All rights reserved
 //============================================================================
 
@@ -191,16 +191,22 @@ int main()
         for (int i = 0; isDiabolic && i < n; ++i)
             isDiabolic = col_CM[i] == CM;
         if (!isDiabolic)
+        {
             cout << NO;
+        }
         else
         {
             // CHECK DIABOLIC EXOTERIC
             // 1. Values from 1 to n^2 (natural numbers)
             bool isEsoteric = gauss_sum == gauss_sum_aux;
-            // 2 & 3 & 4. Centers
             if (isEsoteric)
                 evaluate_index_map(n, index_map, CM, isEsoteric);
-            cout << (isEsoteric ? ESOTERIC : DIABOLIC);
+
+            // 2 & 3 & 4. Centers
+            if (!isEsoteric)
+                cout << DIABOLIC;
+            else
+                cout << ESOTERIC;
         }
     }
 
