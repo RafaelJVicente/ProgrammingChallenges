@@ -35,7 +35,6 @@ void prepare_index_map(const int &n, int index_map[16])
 
     register int idx_mm = idx_lm + idx_um;
 
-    int im_i;
     if (n % 2 != 0)  // 3. n is odd
     {
         index_map[0] = idx_ul;  // Up
@@ -97,7 +96,7 @@ void evaluate_index_map(const int &n, const int* index_map, const int& CM, bool&
         sides += index_map[7];
         corners += index_map[8];
 
-        centers = centers << 2;
+        centers <<= 2;
     }
     else
     {
@@ -118,7 +117,7 @@ void evaluate_index_map(const int &n, const int* index_map, const int& CM, bool&
         sides += index_map[14];
         corners += index_map[15];
 
-        sides = sides >> 1;
+        sides >>= 1;
     }
     isEsoteric = corners == CM2 && sides == CM2 && centers == CM2;
 }
@@ -147,8 +146,7 @@ int main()
         int im_idx = 0;
 
         // gauss_sum = (n^2) * (n^2 + 1) / 2
-        int gauss_sum = MAT_SIZE_n * (MAT_SIZE_n + 1);
-        gauss_sum = gauss_sum >> 1;
+        int gauss_sum = (MAT_SIZE_n * (MAT_SIZE_n + 1)) >> 1;
         int gauss_sum_aux = 0;
 
         int CM = 0;
